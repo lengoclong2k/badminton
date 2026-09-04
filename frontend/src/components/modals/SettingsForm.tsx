@@ -17,6 +17,8 @@ type ClubSettings = {
   guestFeeFemale: number;
   /** Tỷ lệ gợi ý cho nữ so với nam, dạng thập phân (0.7 = 70%). Chỉ để tính nhanh, không ép buộc. */
   femaleRatio: number;
+  /** Tiền sân mặc định, điền sẵn khi sinh buổi cố định — chỉ áp dụng cho buổi cố định. */
+  defaultCourtCost: number;
 };
 
 export function ClubNameForm({ initial }: { initial: string }) {
@@ -61,6 +63,7 @@ export function FeeSettingsForm({ initial }: { initial: ClubSettings }) {
   const [guestFeeFemale, setGuestFeeFemale] = useState(initial.guestFeeFemale);
   // Lưu % dưới dạng số nguyên (70 = 70%) cho dễ nhập, chuyển sang thập phân lúc lưu.
   const [femaleRatioPct, setFemaleRatioPct] = useState(Math.round(initial.femaleRatio * 100));
+  const [defaultCourtCost, setDefaultCourtCost] = useState(initial.defaultCourtCost);
   const [submitting, setSubmitting] = useState(false);
   const { showToast } = useToast();
   const router = useRouter();
@@ -83,6 +86,7 @@ export function FeeSettingsForm({ initial }: { initial: ClubSettings }) {
         guestFeeMale,
         guestFeeFemale,
         femaleRatio: Math.min(100, Math.max(1, femaleRatioPct)) / 100,
+        defaultCourtCost,
       });
       showToast("Đã lưu mức quỹ");
       router.refresh();
@@ -124,6 +128,18 @@ export function FeeSettingsForm({ initial }: { initial: ClubSettings }) {
         Tỷ lệ chỉ để tính nhanh — bấm nút để điền vào 2 ô Nữ ở trên. Sau đó vẫn có thể sửa tay 2 ô này
         thành bất kỳ số tiền nào, không bắt buộc theo đúng %.
       </p>
+
+      <div className="border-t border-line pt-3">
+        <CurrencyInput
+          label="Tiền sân mặc định (buổi cố định)"
+          value={defaultCourtCost}
+          onValueChange={setDefaultCourtCost}
+        />
+        <p className="mt-1.5 text-xs text-mut">
+          Tự động điền vào buổi cố định khi sinh lịch, admin vẫn sửa được lúc chốt buổi nếu giá thực tế khác.
+          Buổi phát sinh (vãng lai) không áp dụng số này — vẫn nhập tay như trước.
+        </p>
+      </div>
 
       <Button className="self-start" onClick={handleSave} disabled={submitting}>
         {submitting ? "Đang lưu…" : "Lưu mức quỹ"}

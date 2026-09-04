@@ -4,6 +4,7 @@ import { SexChip } from "@/components/ui/Chip";
 import { ClickableRow } from "@/components/ui/ListRow";
 import { Pagination, parsePage } from "@/components/ui/Pagination";
 import { AddMemberButton } from "@/components/modals/AddMemberModal";
+import { OpenFeePeriodButton } from "@/components/modals/FundActionButtons";
 import { MemberRowMenu } from "@/components/modals/MemberRowMenu";
 import { apiFetch } from "@/lib/api/server";
 
@@ -26,10 +27,9 @@ type FeeStatusRow = {
   slug: string;
   fullName: string;
   sex: Sex;
-  periodMonth: string | null;
-  memberFeeId: string | null;
-  amount: number | null;
-  feeStatus: "paid" | "unpaid" | "waived" | null;
+  unpaidCount: number;
+  unpaidAmount: number;
+  lastOpenedAt: string | null;
 };
 
 const money = (n: number) => `${Math.round(n).toLocaleString("vi-VN")} ₫`;
@@ -63,39 +63,35 @@ export default async function MembersPage({
             {membersRes.total} người · {male} nam · {female} nữ
           </p>
         </div>
-        <AddMemberButton />
+        <div className="flex flex-wrap gap-2">
+          <OpenFeePeriodButton />
+          <AddMemberButton />
+        </div>
       </div>
 
       <Card className="flex flex-col gap-2 p-3">
-        <CardTitle className="px-1 pt-1">Danh sách thành viên · Quỹ tháng này</CardTitle>
+        <CardTitle className="px-1 pt-1">Danh sách thành viên · Tình trạng quỹ</CardTitle>
         {members.map((m) => {
           const fee = feeBySlug.get(m.slug);
-          const hasPeriod = !!fee?.periodMonth;
-          const paid = fee?.feeStatus === "paid";
-          const statusLabel = hasPeriod
-            ? `${paid ? "Đã đóng" : "Chưa đóng"} · ${money(fee?.amount ?? 0)}`
-            : "Chưa mở kỳ quỹ tháng này";
+          const everOpened = !!fee?.lastOpenedAt;
+          const unpaidCount = fee?.unpaidCount ?? 0;
+          const hasUnpaid = unpaidCount > 0;
+          const statusLabel = !everOpened
+            ? "Chưa mở đợt quỹ nào"
+            : hasUnpaid
+              ? `Chưa đóng · ${money(fee?.unpaidAmount ?? 0)}${unpaidCount > 1 ? ` (${unpaidCount} đợt)` : ""}`
+              : "Đã đóng đủ";
 
           return (
             <ClickableRow
               key={m.id}
               href={`/admin/members/${m.slug}`}
-              trailing={
-                <MemberRowMenu
-                  id={m.slug}
-                  name={m.fullName}
-                  sex={m.sex}
-                  paid={paid}
-                  memberFeeId={fee?.memberFeeId ?? null}
-                  amount={fee?.amount ?? null}
-                  periodMonth={fee?.periodMonth ?? null}
-                />
-              }
+              trailing={<MemberRowMenu id={m.slug} name={m.fullName} sex={m.sex} hasUnpaid={hasUnpaid} />}
             >
               <div className="flex items-center gap-3">
                 <SexChip sex={m.sex} />
                 <p className="flex-1 text-sm font-medium text-ink">{m.fullName}</p>
-                <Badge tone={!hasPeriod ? "info" : paid ? "success" : "danger"}>{statusLabel}</Badge>
+                <Badge tone={!everOpened ? "info" : hasUnpaid ? "danger" : "success"}>{statusLabel}</Badge>
               </div>
             </ClickableRow>
           );

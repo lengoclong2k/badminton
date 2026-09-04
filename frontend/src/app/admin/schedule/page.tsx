@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/Badge";
 import { ClickableRow, StaticRow } from "@/components/ui/ListRow";
 import { Pagination, parsePage } from "@/components/ui/Pagination";
 import { CreateSessionButton } from "@/components/modals/CreateSessionModal";
+import { SessionStatusBadge } from "@/components/modals/SessionActionButtons";
 import { apiFetch } from "@/lib/api/server";
 
 const LIMIT = 20;
@@ -113,7 +114,7 @@ export default async function SchedulePage({
           )}
         </Card>
         <p className="text-xs text-mut">
-          Không trừ tiền theo buổi — thành viên đóng quỹ THEO THÁNG. Ai không đi thì mất lượt, không hoàn.
+          Không trừ tiền theo buổi — quỹ thu theo từng đợt admin tự mở. Ai không đi thì mất lượt, không hoàn.
         </p>
       </section>
 
@@ -128,6 +129,7 @@ export default async function SchedulePage({
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-2">
                   <TypeBadge sessionType={s.sessionType} />
+                  <SessionStatusBadge status={s.status} />
                   <p className="text-sm font-medium text-ink">
                     {formatDate(s.playDate)} · {s.startTime.slice(0, 5)}–{s.endTime.slice(0, 5)}
                   </p>
@@ -156,6 +158,7 @@ export default async function SchedulePage({
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-2">
                   <TypeBadge sessionType={s.sessionType} />
+                  <SessionStatusBadge status={s.status} />
                   <p className="text-sm font-medium text-ink">
                     {formatDate(s.playDate)} · {s.startTime.slice(0, 5)}–{s.endTime.slice(0, 5)}
                   </p>
