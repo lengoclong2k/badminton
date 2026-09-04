@@ -1,0 +1,75 @@
+# ─── Dependencies ──────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# ─── Build output ──────────────────────────────────────────────
+dist/
+build/
+out/
+.next/
+*.tsbuildinfo
+
+# ─── Biến môi trường — KHÔNG BAO GIỜ commit ────────────────────
+# .env.example được giữ lại làm tài liệu.
+.env
+.env.*
+!.env.example
+
+# ─── Vercel ────────────────────────────────────────────────────
+.vercel
+
+# ─── Supabase CLI ──────────────────────────────────────────────
+# Giữ lại migrations, seed.sql và erd.dbml — đó là schema của app.
+supabase/.temp/
+supabase/.branches/
+**/supabase/.temp/
+**/supabase/.branches/
+
+# ─── Test / coverage ───────────────────────────────────────────
+coverage/
+*.lcov
+.nyc_output/
+
+# ─── Log ───────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+logs/
+
+# ─── Cache công cụ ─────────────────────────────────────────────
+.eslintcache
+.cache/
+.turbo/
+.parcel-cache/
+
+# ─── Editor / IDE ──────────────────────────────────────────────
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+
+# ─── macOS / Windows ───────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+
+# ─── Khoá & chứng chỉ ──────────────────────────────────────────
+*.pem
+*.key
+*.p12
+
+DEPLOY.md

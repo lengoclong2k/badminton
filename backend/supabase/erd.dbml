@@ -1,0 +1,348 @@
+// =====================================================================
+// CLB Cầu Lông — ERD (DBML)
+// Dán toàn bộ file này vào https://dbdiagram.io/d  (Import > DBML)
+// Khớp với backend/supabase/migrations/*.sql
+// =====================================================================
+
+Project clb_cau_long {
+  database_type: 'PostgreSQL'
+  Note: '''
+    Quản lý quỹ + điểm danh cho một CLB cầu lông.
+    • Quỹ tính THEO THÁNG (không theo buổi), mức quỹ phụ thuộc giới tính.
+    • Khách trả theo buổi, tiền chảy vào quỹ CLB.
+    • Số dư quỹ = tổng fund_entries.amount (dương = thu, âm = chi).
+  '''
+}
+
+// ---------------------------------------------------------------------
+// ENUMS
+// ---------------------------------------------------------------------
+Enum sex {
+  nam
+  nu
+}
+
+Enum member_role {
+  admin
+  member
+}
+
+Enum member_status {
+  active
+  inactive
+}
+
+Enum session_type {
+  fixed [note: 'Buổi cố định hàng tuần — đã nằm trong quỹ tháng']
+  extra [note: 'Buổi phát sinh — không ảnh hưởng quỹ tháng']
+}
+
+Enum session_status {
+  draft     [note: 'Đã tạo, chưa mở đăng ký']
+  open      [note: 'Đang mở đăng ký']
+  closed    [note: 'Đã chốt buổi, đã ghi sổ quỹ']
+  cancelled [note: 'Đã hủy']
+}
+
+Enum rsvp_status {
+  registered
+  cancelled
+}
+
+Enum attendance_status {
+  pending
+  present
+  absent
+}
+
+Enum fee_status {
+  unpaid
+  paid
+  waived
+}
+
+Enum period_status {
+  open
+  closed
+}
+
+Enum fund_entry_type {
+  monthly_fee     [note: '(+) thu quỹ tháng']
+  guest_fee       [note: '(+) thu tiền khách']
+  session_expense [note: '(−) chi sân + cầu của một buổi']
+  other_income    [note: '(+) thu khác']
+  other_expense   [note: '(−) chi khác']
+  adjustment      [note: '(+/−) điều chỉnh thủ công']
+}
+
+// ---------------------------------------------------------------------
+// AUTH (do Supabase quản lý — chỉ vẽ để thấy quan hệ)
+// ---------------------------------------------------------------------
+Table auth.users {
+  id    uuid [pk]
+  email text
+  Note: 'Bảng của Supabase Auth. members.user_id trỏ tới đây.'
+}
+
+// ---------------------------------------------------------------------
+// 1. CẤU HÌNH CLB
+// ---------------------------------------------------------------------
+Table club_settings {
+  id                 smallint      [pk, default: 1, note: 'CHECK (id = 1) — luôn đúng 1 dòng']
+  club_name          text          [not null, default: 'CLB Cầu Lông']
+  default_court      text
+  monthly_fee_male   "numeric(12,2)" [not null, default: 400000, note: 'Quỹ tháng · nam']
+  monthly_fee_female "numeric(12,2)" [not null, default: 280000, note: 'Quỹ tháng · nữ']
+  guest_fee_male     "numeric(12,2)" [not null, default: 70000, note: 'Phí khách · nam']
+  guest_fee_female   "numeric(12,2)" [not null, default: 49000, note: 'Phí khách · nữ']
+  female_ratio       "numeric(5,4)"  [not null, default: 0.7, note: 'Tỷ lệ gợi ý cho nữ trên UI']
+  fee_due_day        smallint      [not null, default: 5, note: 'Hạn đóng quỹ trong tháng']
+  timezone           text          [not null, default: 'Asia/Ho_Chi_Minh']
+  onboarding_done    boolean       [not null, default: false]
+  created_at         timestamptz   [not null, default: `now()`]
+  updated_at         timestamptz   [not null, default: `now()`]
+
+  Note: 'Cấu hình CLB — bảng một dòng (id = 1). Màn /admin/settings, /admin/onboarding.'
+}
+
+// ---------------------------------------------------------------------
+// 2. THÀNH VIÊN
+// ---------------------------------------------------------------------
+Table members {
+  id         uuid          [pk, default: `gen_random_uuid()`]
+  user_id    uuid          [unique, null, note: 'FK auth.users — null nếu chưa có tài khoản đăng nhập']
+  full_name  text          [not null]
+  slug       text          [not null, unique, note: 'Sinh tự động từ full_name, dùng cho /admin/members/[slug]']
+  sex        sex           [not null, note: 'Quyết định mức quỹ tháng & phí khách. Chỉ admin sửa được.']
+  phone      text
+  email      text          [note: 'Dùng để tự gắn tài khoản khi thành viên đăng ký']
+  avatar_url text
+  role       member_role   [not null, default: 'member']
+  status     member_status [not null, default: 'active']
+  joined_at  date          [not null, default: `current_date`]
+  left_at    date
+  note       text
+  created_at timestamptz   [not null, default: `now()`]
+  updated_at timestamptz   [not null, default: `now()`]
+
+  indexes {
+    status
+    role
+  }
+
+  Note: 'Thành viên CLB. Màn /admin/members, /m/profile.'
+}
+
+// ---------------------------------------------------------------------
+// 3. LỊCH CỐ ĐỊNH HÀNG TUẦN
+// ---------------------------------------------------------------------
+Table fixed_schedules {
+  id         uuid        [pk, default: `gen_random_uuid()`]
+  weekday    smallint    [not null, note: '0 = Chủ Nhật … 6 = Thứ Bảy']
+  start_time time        [not null]
+  end_time   time        [not null, note: 'CHECK end_time > start_time']
+  court      text
+  is_active  boolean     [not null, default: true]
+  created_at timestamptz [not null, default: `now()`]
+  updated_at timestamptz [not null, default: `now()`]
+
+  indexes {
+    (weekday, start_time) [unique]
+  }
+
+  Note: 'Khung giờ cố định hàng tuần → sinh sessions type = fixed.'
+}
+
+// ---------------------------------------------------------------------
+// 4. BUỔI ĐÁNH
+// ---------------------------------------------------------------------
+Table sessions {
+  id                  uuid            [pk, default: `gen_random_uuid()`]
+  slug                text            [not null, unique, note: 'Link RSVP công khai: 2026-08-27-toi']
+  play_date           date            [not null]
+  start_time          time            [not null]
+  end_time            time            [not null]
+  court               text
+  session_type        session_type    [not null, default: 'fixed']
+  status              session_status  [not null, default: 'draft']
+  fixed_schedule_id   uuid            [null, note: 'FK fixed_schedules — null nếu là buổi phát sinh']
+  guest_slots_enabled boolean         [not null, default: false]
+  guest_slots_max     smallint        [not null, default: 0]
+  guest_fee_male      "numeric(12,2)" [not null, default: 0, note: 'Snapshot phí khách lúc tạo buổi']
+  guest_fee_female    "numeric(12,2)" [not null, default: 0, note: 'Snapshot phí khách lúc tạo buổi']
+  court_cost          "numeric(12,2)" [not null, default: 0, note: 'Điền lúc chốt buổi']
+  shuttle_cost        "numeric(12,2)" [not null, default: 0]
+  other_cost          "numeric(12,2)" [not null, default: 0]
+  total_cost          "numeric(12,2)" [note: 'GENERATED = court_cost + shuttle_cost + other_cost']
+  note                text
+  rsvp_opens_at       timestamptz
+  rsvp_closes_at      timestamptz
+  closed_at           timestamptz
+  cancelled_at        timestamptz
+  cancel_reason       text
+  created_by          uuid            [null, note: 'FK members']
+  created_at          timestamptz     [not null, default: `now()`]
+  updated_at          timestamptz     [not null, default: `now()`]
+
+  indexes {
+    play_date
+    status
+    (play_date, start_time) [unique]
+  }
+
+  Note: 'Một buổi đánh. Màn /admin/schedule, /admin/sessions/[id], /rsvp/[slug].'
+}
+
+// ---------------------------------------------------------------------
+// 5. ĐĂNG KÝ & ĐIỂM DANH
+// ---------------------------------------------------------------------
+Table session_attendees {
+  id            uuid              [pk, default: `gen_random_uuid()`]
+  session_id    uuid              [not null, note: 'FK sessions ON DELETE CASCADE']
+  member_id     uuid              [null, note: 'FK members — NULL nghĩa là khách']
+  guest_name    text              [null, note: 'Chỉ có khi member_id IS NULL']
+  guest_sex     sex               [null]
+  invited_by    uuid              [null, note: 'FK members — ai dẫn khách']
+  is_guest      boolean           [note: 'GENERATED = (member_id IS NULL)']
+  rsvp_status   rsvp_status       [not null, default: 'registered']
+  attendance    attendance_status [not null, default: 'pending']
+  guest_fee     "numeric(12,2)"   [not null, default: 0, note: 'CHECK: chỉ khách mới > 0']
+  guest_paid    boolean           [not null, default: false]
+  registered_at timestamptz       [not null, default: `now()`]
+  checked_at    timestamptz
+  note          text
+
+  indexes {
+    session_id
+    member_id
+    (session_id, member_id) [unique, note: 'Partial: WHERE member_id IS NOT NULL']
+  }
+
+  Note: '''
+    Một dòng = một người trong một buổi (thành viên HOẶC khách).
+    CHECK: (member_id NOT NULL và guest_* NULL) hoặc (member_id NULL và guest_* NOT NULL).
+  '''
+}
+
+// ---------------------------------------------------------------------
+// 6. KỲ QUỸ THÁNG
+// ---------------------------------------------------------------------
+Table fee_periods {
+  id           uuid            [pk, default: `gen_random_uuid()`]
+  period_month date            [not null, unique, note: 'Luôn là ngày 1 của tháng']
+  fee_male     "numeric(12,2)" [not null, note: 'Snapshot mức quỹ nam của tháng đó']
+  fee_female   "numeric(12,2)" [not null, note: 'Snapshot mức quỹ nữ của tháng đó']
+  due_date     date
+  status       period_status   [not null, default: 'open']
+  closed_at    timestamptz
+  created_at   timestamptz     [not null, default: `now()`]
+
+  Note: 'Mỗi tháng một dòng. Màn /admin/fund.'
+}
+
+// ---------------------------------------------------------------------
+// 7. QUỸ THÁNG CỦA TỪNG THÀNH VIÊN
+// ---------------------------------------------------------------------
+Table member_fees {
+  id           uuid            [pk, default: `gen_random_uuid()`]
+  period_id    uuid            [not null, note: 'FK fee_periods ON DELETE CASCADE']
+  member_id    uuid            [not null, note: 'FK members ON DELETE CASCADE']
+  amount       "numeric(12,2)" [not null]
+  status       fee_status      [not null, default: 'unpaid']
+  paid_at      timestamptz
+  paid_method  text
+  collected_by uuid            [null, note: 'FK members — admin đã thu']
+  note         text
+  created_at   timestamptz     [not null, default: `now()`]
+  updated_at   timestamptz     [not null, default: `now()`]
+
+  indexes {
+    member_id
+    status
+    (period_id, member_id) [unique]
+  }
+
+  Note: 'Khoản quỹ tháng của từng người. Màn /admin/members, /m/fund.'
+}
+
+// ---------------------------------------------------------------------
+// 8. SỔ QUỸ CLB
+// ---------------------------------------------------------------------
+Table fund_entries {
+  id            uuid            [pk, default: `gen_random_uuid()`]
+  entry_date    date            [not null, default: `current_date`]
+  entry_type    fund_entry_type [not null]
+  amount        "numeric(12,2)" [not null, note: 'Dương = thu, âm = chi. CHECK dấu khớp entry_type.']
+  description   text            [not null]
+  session_id    uuid            [null, note: 'FK sessions — nếu phát sinh từ một buổi']
+  member_fee_id uuid            [null, note: 'FK member_fees — UNIQUE khi chưa xóa, tránh ghi trùng']
+  member_id     uuid            [null, note: 'FK members — người nộp']
+  created_by    uuid            [null, note: 'FK members']
+  created_at    timestamptz     [not null, default: `now()`]
+  deleted_at    timestamptz     [null, note: 'Xóa mềm — số dư tự tính lại']
+  deleted_by    uuid            [null, note: 'FK members']
+
+  indexes {
+    entry_date
+    session_id
+    member_fee_id [unique, note: 'Partial: WHERE member_fee_id IS NOT NULL AND deleted_at IS NULL']
+  }
+
+  Note: 'Nguồn sự thật duy nhất về số dư quỹ = SUM(amount) WHERE deleted_at IS NULL.'
+}
+
+// ---------------------------------------------------------------------
+// 9. NHẬT KÝ HOẠT ĐỘNG
+// ---------------------------------------------------------------------
+Table activity_log {
+  id          uuid        [pk, default: `gen_random_uuid()`]
+  occurred_at timestamptz [not null, default: `now()`]
+  actor_id    uuid        [null, note: 'FK members']
+  action      text        [not null, note: 'session.close, fee.collect, …']
+  entity_type text
+  entity_id   uuid
+  description text        [not null]
+  meta        jsonb       [not null, default: '{}']
+
+  indexes {
+    occurred_at
+  }
+
+  Note: 'Card "Hoạt động gần đây" ở /admin.'
+}
+
+// ---------------------------------------------------------------------
+// QUAN HỆ
+// ---------------------------------------------------------------------
+Ref: members.user_id - auth.users.id                      // 1–1, nullable
+
+Ref: sessions.fixed_schedule_id > fixed_schedules.id      // [delete: set null]
+Ref: sessions.created_by        > members.id              // [delete: set null]
+
+Ref: session_attendees.session_id > sessions.id           // [delete: cascade]
+Ref: session_attendees.member_id  > members.id            // [delete: cascade]
+Ref: session_attendees.invited_by > members.id            // [delete: set null]
+
+Ref: member_fees.period_id    > fee_periods.id            // [delete: cascade]
+Ref: member_fees.member_id    > members.id                // [delete: cascade]
+Ref: member_fees.collected_by > members.id                // [delete: set null]
+
+Ref: fund_entries.session_id    > sessions.id             // [delete: set null]
+Ref: fund_entries.member_fee_id - member_fees.id          // 1–1 khi đã ghi sổ
+Ref: fund_entries.member_id     > members.id              // [delete: set null]
+Ref: fund_entries.created_by    > members.id              // [delete: set null]
+Ref: fund_entries.deleted_by    > members.id              // [delete: set null]
+
+Ref: activity_log.actor_id > members.id                   // [delete: set null]
+
+// ---------------------------------------------------------------------
+// GHI CHÚ: các VIEW không vẽ được trong dbdiagram, liệt kê cho đủ
+//   v_fund_balance        — số dư, tổng thu, tổng chi
+//   v_fund_ledger         — sổ quỹ + số dư lũy kế
+//   v_session_summary     — mỗi buổi: nam/nữ đăng ký, khách, slot còn, thu–chi
+//   v_session_attendees   — điểm danh + trạng thái quỹ tháng từng người
+//   v_member_month_stats  — quỹ, số buổi đi, giá thực mỗi buổi
+//   v_leaderboard         — xếp hạng theo giá thực mỗi buổi
+//   v_member_current_fee  — quỹ tháng hiện tại của từng thành viên
+//   v_month_overview      — đã đóng / chưa đóng / còn thiếu theo tháng
+// ---------------------------------------------------------------------
