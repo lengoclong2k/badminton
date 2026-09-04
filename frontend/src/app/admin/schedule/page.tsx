@@ -4,6 +4,7 @@ import { ClickableRow, StaticRow } from "@/components/ui/ListRow";
 import { Pagination, parsePage } from "@/components/ui/Pagination";
 import { CreateSessionButton } from "@/components/modals/CreateSessionModal";
 import { GenerateSessionsButton } from "@/components/modals/ScheduleActionButtons";
+import { SessionStatusBadge } from "@/components/modals/SessionActionButtons";
 import { apiFetch } from "@/lib/api/server";
 
 const LIMIT = 20;
@@ -124,23 +125,28 @@ export default async function SchedulePage({
       <section className="flex flex-col gap-3">
         <div>
           <CardTitle className="text-lg">Buổi sắp tới ({upcoming.length})</CardTitle>
-          <CardSubtitle>Bấm vào một buổi để xem danh sách đăng ký, thêm người, sửa hoặc chốt sổ.</CardSubtitle>
+          <CardSubtitle>
+            Buổi cố định sinh ra ở trạng thái <b>Nháp</b> — phải bấm “Mở đăng ký” trong buổi thì link RSVP mới
+            dùng được. Buổi phát sinh thì mở sẵn ngay khi tạo.
+          </CardSubtitle>
         </div>
         <Card className="flex flex-col gap-2 p-3">
           {upcoming.map((s) => (
             <ClickableRow key={s.id} href={`/admin/sessions/${s.slug}`}>
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-col gap-1.5">
+                <div className="flex flex-wrap items-center gap-2">
                   <TypeBadge sessionType={s.sessionType} />
+                  <SessionStatusBadge status={s.status} />
                   <p className="text-sm font-medium text-ink">
                     {formatDate(s.playDate)} · {s.startTime.slice(0, 5)}–{s.endTime.slice(0, 5)}
                   </p>
                 </div>
                 <p className="text-xs text-mut">
-                  {s.maleCount} nam · {s.femaleCount} nữ · {s.guestCount} khách đăng ký
-                  {s.guestSlotsEnabled && s.guestSlotsLeft > 0
-                    ? ` · còn ${s.guestSlotsLeft} slot khách tự đăng ký`
-                    : ""}
+                  {s.status === "draft"
+                    ? "Chưa gửi được link đăng ký — vào buổi rồi bấm “Mở đăng ký”"
+                    : s.maleCount + s.femaleCount + s.guestCount === 0
+                      ? "Đã mở đăng ký · chưa ai nhận lời"
+                      : `Đã nhận lời: ${s.maleCount} nam · ${s.femaleCount} nữ · ${s.guestCount} khách`}
                 </p>
               </div>
             </ClickableRow>
@@ -158,8 +164,9 @@ export default async function SchedulePage({
           {closedSessions.map((s) => (
             <ClickableRow key={s.id} href={`/admin/sessions/${s.slug}`}>
               <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <TypeBadge sessionType={s.sessionType} />
+                  <SessionStatusBadge status={s.status} />
                   <p className="text-sm font-medium text-ink">
                     {formatDate(s.playDate)} · {s.startTime.slice(0, 5)}–{s.endTime.slice(0, 5)}
                   </p>

@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-2xl flex-col items-center justify-center gap-6 px-6">
       <div className="text-center">
-        <h1 className="text-2xl font-bold text-ink">CLB Cầu Lông của Long</h1>
+        <h1 className="text-2xl font-bold text-ink">CLB Cầu Lông HDA</h1>
         <p className="text-sm text-sec">Base frontend — Next.js + Tailwind, chọn khu vực để xem</p>
       </div>
       <div className="grid w-full gap-4 sm:grid-cols-3">

@@ -2,7 +2,7 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsBoolean, IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 
 export class UpdateSettingsDto {
-  @ApiPropertyOptional({ example: 'CLB Cầu Lông của Long' })
+  @ApiPropertyOptional({ example: 'CLB Cầu Lông HDA' })
   @IsOptional() @IsString()
   clubName?: string;
 

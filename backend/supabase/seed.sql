@@ -8,7 +8,7 @@ begin;
 
 -- 1. Cấu hình CLB ------------------------------------------------------
 update public.club_settings set
-  club_name          = 'CLB Cầu Lông của Long',
+  club_name          = 'CLB Cầu Lông HDA',
   default_court      = 'Sân Cầu Lông Thành Công',
   monthly_fee_male   = 400000,
   monthly_fee_female = 280000,

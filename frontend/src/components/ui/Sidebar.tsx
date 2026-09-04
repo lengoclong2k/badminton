@@ -102,7 +102,7 @@ export function Sidebar({
       >
         <div className="mb-4 flex items-center justify-between px-1">
           <p className={cn("truncate text-base font-bold text-ink", collapsed && "lg:hidden")}>
-            CLB Cầu Lông Long
+            CLB Cầu Lông HDA
           </p>
           <div className="flex shrink-0 items-center gap-1">
             {onToggleCollapse && (

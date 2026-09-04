@@ -44,7 +44,7 @@ function LoginForm() {
   return (
     <Card className="w-full max-w-sm flex flex-col gap-5">
       <div className="flex flex-col gap-1">
-        <CardTitle className="text-xl">CLB Cầu Lông của Long</CardTitle>
+        <CardTitle className="text-xl">CLB Cầu Lông HDA</CardTitle>
         <CardSubtitle>Đăng nhập để quản lý lịch, thành viên và quỹ CLB</CardSubtitle>
       </div>
 

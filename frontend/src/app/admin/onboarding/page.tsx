@@ -27,7 +27,7 @@ export default function OnboardingPage() {
 
       <Card className="flex flex-col gap-4">
         <CardTitle>{STEPS[0]}</CardTitle>
-        <InputField label="Tên CLB" placeholder="VD: CLB Cầu Lông Long" />
+        <InputField label="Tên CLB" placeholder="VD: CLB Cầu Lông HDA" />
         <InputField
           label="Sân thường đánh"
           placeholder="VD: Sân Cầu Lông Thành Công"

@@ -55,7 +55,7 @@ export default async function AdminDashboardPage() {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-bold text-ink">Tổng quan</h1>
-        <p className="text-sm text-sec capitalize">{today} · CLB Cầu Lông của Long</p>
+        <p className="text-sm text-sec capitalize">{today} · CLB Cầu Lông HDA</p>
       </div>
 
       <div className="flex flex-wrap gap-4">

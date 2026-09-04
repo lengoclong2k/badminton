@@ -72,7 +72,7 @@ export function AdminShell({
           >
             <Menu size={22} />
           </button>
-          <p className="text-sm font-bold text-ink">CLB Cầu Lông Long</p>
+          <p className="text-sm font-bold text-ink">CLB Cầu Lông HDA</p>
         </header>
         <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:max-w-[1200px] lg:px-10 lg:py-8">
           {children}

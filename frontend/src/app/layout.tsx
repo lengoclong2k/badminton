@@ -7,7 +7,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "CLB Cầu Lông Long",
+  title: "CLB Cầu Lông HDA",
   description: "Quản lý lịch đánh, điểm danh và quỹ CLB cầu lông Long",
 };
 

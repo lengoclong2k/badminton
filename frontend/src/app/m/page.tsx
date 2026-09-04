@@ -39,7 +39,7 @@ export default async function MemberHomePage() {
     <div className="flex flex-col gap-5">
       <div>
         <h1 className="text-xl font-bold text-ink">Chào {me.member?.fullName ?? me.email}</h1>
-        <p className="text-sm text-sec">CLB Cầu Lông của Long</p>
+        <p className="text-sm text-sec">CLB Cầu Lông HDA</p>
       </div>
       {isTodaySession && today ? (
         <Card className="flex flex-col gap-2">
