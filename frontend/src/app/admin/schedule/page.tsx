@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/Badge";
 import { ClickableRow, StaticRow } from "@/components/ui/ListRow";
 import { Pagination, parsePage } from "@/components/ui/Pagination";
 import { CreateSessionButton } from "@/components/modals/CreateSessionModal";
-import { SessionStatusBadge } from "@/components/modals/SessionActionButtons";
+import { GenerateSessionsButton } from "@/components/modals/ScheduleActionButtons";
 import { apiFetch } from "@/lib/api/server";
 
 const LIMIT = 20;
@@ -11,7 +11,7 @@ const LIMIT = 20;
 type ClubMember = { id: string; fullName: string; sex: "nam" | "nu" };
 type PaginatedMembers = { items: ClubMember[]; total: number };
 
-type Me = { defaultGuestFeeMale: number; defaultGuestFeeFemale: number };
+type Me = { isAdmin: boolean; defaultGuestFeeMale: number; defaultGuestFeeFemale: number };
 
 type FixedSchedule = {
   id: string;
@@ -90,12 +90,15 @@ export default async function SchedulePage({
       </div>
 
       <section className="flex flex-col gap-3">
-        <div>
-          <CardTitle className="text-lg">Lịch mẫu hàng tuần</CardTitle>
-          <CardSubtitle>
-            Lịch lặp lại tự động tạo buổi mới — không phải một buổi cụ thể nên không có trang chi tiết để bấm vào.
-            Muốn sửa thì vào Cài đặt.
-          </CardSubtitle>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <CardTitle className="text-lg">Lịch mẫu hàng tuần</CardTitle>
+            <CardSubtitle>
+              Lịch lặp lại tự động sinh buổi mới cho 5 tuần tới (job chạy mỗi ngày lúc 00:10). Đây không phải một
+              buổi cụ thể nên không có trang chi tiết để bấm vào — muốn sửa giờ/sân thì vào Cài đặt.
+            </CardSubtitle>
+          </div>
+          {me.isAdmin && <GenerateSessionsButton />}
         </div>
         <Card className="flex flex-col gap-2 p-3">
           {fixedSchedules.map((f) => (
@@ -114,7 +117,7 @@ export default async function SchedulePage({
           )}
         </Card>
         <p className="text-xs text-mut">
-          Không trừ tiền theo buổi — quỹ thu theo từng đợt admin tự mở. Ai không đi thì mất lượt, không hoàn.
+          Không trừ tiền theo buổi — thành viên đóng quỹ THEO THÁNG. Ai không đi thì mất lượt, không hoàn.
         </p>
       </section>
 
@@ -129,7 +132,6 @@ export default async function SchedulePage({
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-2">
                   <TypeBadge sessionType={s.sessionType} />
-                  <SessionStatusBadge status={s.status} />
                   <p className="text-sm font-medium text-ink">
                     {formatDate(s.playDate)} · {s.startTime.slice(0, 5)}–{s.endTime.slice(0, 5)}
                   </p>
@@ -158,7 +160,6 @@ export default async function SchedulePage({
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-2">
                   <TypeBadge sessionType={s.sessionType} />
-                  <SessionStatusBadge status={s.status} />
                   <p className="text-sm font-medium text-ink">
                     {formatDate(s.playDate)} · {s.startTime.slice(0, 5)}–{s.endTime.slice(0, 5)}
                   </p>
