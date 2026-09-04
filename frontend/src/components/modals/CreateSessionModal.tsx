@@ -105,7 +105,7 @@ export function CreateSessionButton({
       <Modal open={open} onClose={() => setOpen(false)}>
         <ModalHeader title="Tạo buổi đánh" subtitle="Buổi phát sinh — không ảnh hưởng quỹ tháng" />
         <div className="flex flex-col gap-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <InputField label="Ngày" type="date" value={playDate} onChange={(e) => setPlayDate(e.target.value)} />
             <div className="grid grid-cols-2 gap-2">
               <InputField label="Bắt đầu" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />

@@ -3,7 +3,6 @@ import { Badge } from "@/components/ui/Badge";
 import { ClickableRow, StaticRow } from "@/components/ui/ListRow";
 import { Pagination, parsePage } from "@/components/ui/Pagination";
 import { CreateSessionButton } from "@/components/modals/CreateSessionModal";
-import { SessionStatusBadge } from "@/components/modals/SessionActionButtons";
 import { apiFetch } from "@/lib/api/server";
 
 const LIMIT = 20;
@@ -77,7 +76,7 @@ export default async function SchedulePage({
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-ink">Lịch đánh</h1>
           <p className="text-sm text-sec">Buổi cố định hàng tuần + buổi phát sinh</p>
@@ -129,7 +128,6 @@ export default async function SchedulePage({
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-2">
                   <TypeBadge sessionType={s.sessionType} />
-                  <SessionStatusBadge status={s.status} />
                   <p className="text-sm font-medium text-ink">
                     {formatDate(s.playDate)} · {s.startTime.slice(0, 5)}–{s.endTime.slice(0, 5)}
                   </p>

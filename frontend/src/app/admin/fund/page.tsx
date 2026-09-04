@@ -1,7 +1,7 @@
 import { Card, CardTitle, StatCard } from "@/components/ui/Card";
 import { StaticRow } from "@/components/ui/ListRow";
 import { Pagination, parsePage } from "@/components/ui/Pagination";
-import { CollectFeeButton, OpenFeePeriodButton, AddExpenseButton, DeleteEntryButton } from "@/components/modals/FundActionButtons";
+import { CollectFeeButton, AddExpenseButton, DeleteEntryButton } from "@/components/modals/FundActionButtons";
 import { apiFetch } from "@/lib/api/server";
 
 const LIMIT = 20;
@@ -59,11 +59,10 @@ export default async function FundPage({
       </div>
 
       <section className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <CardTitle className="text-lg">Sổ quỹ ({ledger.total})</CardTitle>
           {me.isAdmin && (
-            <div className="flex gap-2">
-              <OpenFeePeriodButton />
+            <div className="flex flex-wrap gap-2">
               <CollectFeeButton />
               <AddExpenseButton />
             </div>
