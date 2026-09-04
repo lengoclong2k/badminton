@@ -1,4 +1,4 @@
 test
-supabase
+/supabase
 .env
 .env.local
