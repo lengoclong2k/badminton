@@ -1,8 +1,7 @@
 import { Card, CardTitle } from "@/components/ui/Card";
-import { SexChip } from "@/components/ui/Chip";
 import {
   AddParticipantsButton, BulkMarkGoingButton, CancelSessionButton, CloseSessionButton, EditSessionButton,
-  GuestPaidBadge, MemberRsvpControl, OpenSessionButton, RsvpLinkButton, SessionStatusBadge,
+  GuestPaidBadge, MemberRsvpControl, OpenSessionButton, RsvpLinkButton, RsvpStatusBadge, SessionStatusBadge,
 } from "@/components/modals/SessionActionButtons";
 import { apiFetch } from "@/lib/api/server";
 
@@ -113,11 +112,18 @@ export default async function SessionDetailPage({
           return (
             <div
               key={a.id}
-              className="flex flex-wrap items-center gap-2 border-b border-line pb-3 last:border-0 last:pb-0 sm:gap-3"
+              className="flex flex-col gap-2 border-b border-line pb-3 last:border-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
             >
-              <div className="flex min-w-0 flex-1 items-center gap-2">
-                <SexChip sex={sex} />
-                <p className="min-w-0 flex-1 truncate text-sm font-medium text-ink" title={name}>
+              <div className="flex min-w-0 flex-col gap-1">
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`text-xs font-semibold ${sex === "nam" ? "text-nam-text" : "text-nu-text"}`}
+                  >
+                    {sex === "nam" ? "Nam" : "Nữ"}
+                  </span>
+                  {!a.isGuest && <RsvpStatusBadge status={a.rsvpStatus} />}
+                </div>
+                <p className="truncate text-sm font-medium text-ink" title={name}>
                   {name}
                 </p>
               </div>

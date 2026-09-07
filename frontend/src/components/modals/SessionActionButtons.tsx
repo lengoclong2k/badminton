@@ -51,7 +51,7 @@ export function GuestPaidBadge({
   }
 
   return (
-    <div className="flex w-full flex-wrap items-center justify-start gap-3 sm:w-auto sm:min-w-[280px] sm:justify-end sm:flex-nowrap">
+    <div className="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-end">
       <Badge tone={guestPaid ? "success" : "danger"}>
         {guestPaid ? `Đã nộp ${money(guestFee)}` : `Chưa nộp ${money(guestFee)}`}
       </Badge>
@@ -72,6 +72,18 @@ export function GuestPaidBadge({
 }
 
 type RsvpMemberStatus = "pending" | "registered" | "cancelled";
+
+/** Badge "đã điểm danh / chưa điểm danh" — hiện ngay cạnh giới tính ở dòng
+ *  đầu của mỗi dòng thành viên. Chỉ nói đã bấm hay chưa bấm, KHÔNG nói bấm
+ *  gì (Có đi hay Không đi) — chi tiết đó thể hiện qua nút nào được tô đậm
+ *  (sửa được) hoặc badge riêng bên dưới tên (chỉ xem). */
+export function RsvpStatusBadge({ status }: { status: RsvpMemberStatus }) {
+  return status === "pending" ? (
+    <Badge tone="info">Chưa điểm danh</Badge>
+  ) : (
+    <Badge tone="success">Đã điểm danh</Badge>
+  );
+}
 
 /** Điểm danh RSVP của 1 thành viên. Từ giờ RSVP CHÍNH LÀ điểm danh: thành
  *  viên tự bấm "Có đi"/"Không đi" qua link công khai và bị khóa sau khi chọn
@@ -107,28 +119,27 @@ export function MemberRsvpControl({
   const label = status === "registered" ? "Có đi" : status === "cancelled" ? "Không đi" : "Chưa điểm danh";
   const tone = status === "registered" ? "success" : status === "cancelled" ? "danger" : "info";
 
-  // Không sửa được (viewer thường, hoặc buổi đã chốt): chỉ hiện nhãn trạng thái.
+  // Không sửa được (viewer thường, hoặc buổi đã chốt): chỉ hiện nhãn trạng thái
+  // chi tiết (Có đi/Không đi/Chưa điểm danh) — badge "đã/chưa điểm danh" ở
+  // dòng trên đã đủ chung, đây là nhãn cụ thể hơn.
   if (!canEdit) {
     return (
-      <div className="flex w-full items-center justify-start sm:w-auto sm:min-w-[280px] sm:justify-end">
+      <div className="flex w-full items-center justify-start sm:w-auto sm:justify-end">
         <Badge tone={tone}>{label}</Badge>
       </div>
     );
   }
 
-  // Sửa được: 2 nút Có đi/Không đi đã đủ để thể hiện trạng thái hiện tại
-  // (nút tương ứng được tô đậm) — bỏ Badge để khỏi lặp lại cùng 1 nhãn 2 lần.
-  // Khi còn "Chưa điểm danh" thì hiện thêm nhãn đó vì chưa nút nào được tô.
+  // Sửa được: 2 nút Có đi/Không đi chia đều 2 cột, nút tương ứng trạng thái
+  // hiện tại được tô đậm để thể hiện lựa chọn.
   return (
-    <div className="flex w-full flex-wrap items-center justify-start gap-2 sm:w-auto sm:min-w-[280px] sm:justify-end sm:flex-nowrap">
-      {status === "pending" && <Badge tone={tone}>{label}</Badge>}
+    <div className="grid w-full grid-cols-2 gap-2 sm:w-auto sm:min-w-[220px]">
       <Button
         type="button"
         size="sm"
         variant={status === "registered" ? "primary" : "secondary"}
         onClick={() => mark("registered")}
         disabled={submitting}
-        className="shrink-0"
       >
         Có đi
       </Button>
@@ -138,7 +149,6 @@ export function MemberRsvpControl({
         variant={status === "cancelled" ? "dangerSolid" : "secondary"}
         onClick={() => mark("cancelled")}
         disabled={submitting}
-        className="shrink-0"
       >
         Không đi
       </Button>
