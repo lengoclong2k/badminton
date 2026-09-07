@@ -70,15 +70,15 @@ export class SessionsController {
   }
 
   @Post()
-  @Roles(MemberRole.ADMIN, MemberRole.MEMBER)
-  @ApiOperation({ summary: 'Tạo buổi đánh (admin và thành viên đều tạo được)' })
+  @Roles(MemberRole.ADMIN)
+  @ApiOperation({ summary: 'Tạo buổi đánh (chỉ chủ nhiệm — thành viên chỉ xem)' })
   create(@CurrentMember() user: AuthenticatedUser, @Body() dto: CreateSessionDto) {
     return this.service.create(dto, user.member!.id, user.authUserId);
   }
 
   @Patch(':idOrSlug')
-  @Roles(MemberRole.ADMIN, MemberRole.MEMBER)
-  @ApiOperation({ summary: 'Sửa thông tin buổi (admin và thành viên đều sửa được)' })
+  @Roles(MemberRole.ADMIN)
+  @ApiOperation({ summary: 'Sửa thông tin buổi (chỉ chủ nhiệm — thành viên chỉ xem)' })
   update(
     @CurrentMember() user: AuthenticatedUser,
     @Param('idOrSlug') idOrSlug: string,
@@ -125,8 +125,13 @@ export class SessionsController {
 
   // ---- Đăng ký & điểm danh -------------------------------------------------
 
+  // Không có route FE nào gọi endpoint này nữa — thành viên tự đăng ký qua
+  // link RSVP công khai (rsvp.controller.ts, không cần đăng nhập), còn trong
+  // app đã đăng nhập thì thành viên chỉ xem, không tự đổi được. Khóa lại
+  // ADMIN-only để phòng gọi thẳng API, không còn để hở cho MEMBER.
   @Post(':idOrSlug/rsvp')
-  @ApiOperation({ summary: 'Tự đăng ký / bỏ đăng ký buổi này' })
+  @Roles(MemberRole.ADMIN)
+  @ApiOperation({ summary: '[Admin] Tự đăng ký / bỏ đăng ký buổi này' })
   rsvpSelf(@CurrentMember() user: AuthenticatedUser, @Param('idOrSlug') idOrSlug: string) {
     return this.service.toggleMember(idOrSlug, user.member!.id);
   }
@@ -146,9 +151,9 @@ export class SessionsController {
   }
 
   @Post(':idOrSlug/participants')
-  @Roles(MemberRole.ADMIN, MemberRole.MEMBER)
+  @Roles(MemberRole.ADMIN)
   @ApiOperation({
-    summary: 'Thêm nhiều thành viên/khách vào buổi đang mở cùng lúc (gần ngày mới biết thêm người đi)',
+    summary: 'Thêm nhiều thành viên/khách vào buổi đang mở cùng lúc (chỉ chủ nhiệm)',
   })
   addParticipants(@Param('idOrSlug') idOrSlug: string, @Body() dto: AddParticipantsDto) {
     return this.service.addParticipants(idOrSlug, dto.memberIds, dto.guests);

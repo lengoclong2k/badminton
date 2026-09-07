@@ -5,6 +5,8 @@ import { Avatar } from "@/components/ui/Avatar";
 import { EditMemberButton, DeleteMemberButton } from "@/components/modals/MemberActionButtons";
 import { apiFetch } from "@/lib/api/server";
 
+type Me = { isAdmin: boolean };
+
 type Member = {
   id: string;
   slug: string;
@@ -31,9 +33,10 @@ export default async function MemberDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [member, fees] = await Promise.all([
+  const [member, fees, me] = await Promise.all([
     apiFetch<Member>(`/members/${id}`),
     apiFetch<MemberFee[]>(`/members/${id}/fees`),
+    apiFetch<Me>("/auth/me"),
   ]);
 
   const latestPaid = fees.find((f) => f.status === "paid");
@@ -72,10 +75,12 @@ export default async function MemberDetailPage({
         </div>
       </Card>
 
-      <div className="flex gap-3">
-        <EditMemberButton slug={member.slug} name={member.fullName} sex={member.sex} phone={member.phone} />
-        <DeleteMemberButton slug={member.slug} name={member.fullName} />
-      </div>
+      {me.isAdmin && (
+        <div className="flex gap-3">
+          <EditMemberButton slug={member.slug} name={member.fullName} sex={member.sex} phone={member.phone} />
+          <DeleteMemberButton slug={member.slug} name={member.fullName} />
+        </div>
+      )}
     </div>
   );
 }

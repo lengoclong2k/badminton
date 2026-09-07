@@ -83,11 +83,13 @@ export default async function SchedulePage({
           <h1 className="text-2xl font-bold text-ink">Lịch đánh</h1>
           <p className="text-sm text-sec">Buổi cố định hàng tuần + buổi phát sinh</p>
         </div>
-        <CreateSessionButton
-          members={members}
-          defaultGuestFeeMale={me.defaultGuestFeeMale}
-          defaultGuestFeeFemale={me.defaultGuestFeeFemale}
-        />
+        {me.isAdmin && (
+          <CreateSessionButton
+            members={members}
+            defaultGuestFeeMale={me.defaultGuestFeeMale}
+            defaultGuestFeeFemale={me.defaultGuestFeeFemale}
+          />
+        )}
       </div>
 
       <section className="flex flex-col gap-3">

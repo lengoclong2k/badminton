@@ -1,7 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { MemberRole } from 'src/common/enums';
-import { Roles } from 'src/common/decorators';
 import { DashboardService } from './dashboard.service';
 
 @ApiTags('dashboard')
@@ -10,9 +8,12 @@ import { DashboardService } from './dashboard.service';
 export class DashboardController {
   constructor(private readonly service: DashboardService) {}
 
+  // Toàn bộ dữ liệu gộp ở đây đều lấy từ các endpoint GET vốn đã mở cho mọi
+  // thành viên (fund/balance, fees/overview, sessions/today, sessions/upcoming,
+  // dashboard/activities) — không có gì nhạy cảm hơn, nên không giới hạn
+  // ADMIN-only ở đây để thành viên vẫn xem được trang Tổng quan (chỉ xem).
   @Get()
-  @Roles(MemberRole.ADMIN)
-  @ApiOperation({ summary: 'Toàn bộ số liệu cho trang Tổng quan của admin' })
+  @ApiOperation({ summary: 'Toàn bộ số liệu cho trang Tổng quan' })
   overview() {
     return this.service.overviewForAdmin();
   }

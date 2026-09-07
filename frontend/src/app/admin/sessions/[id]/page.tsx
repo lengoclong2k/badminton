@@ -74,19 +74,21 @@ export default async function SessionDetailPage({
             {session.sessionType === "fixed" ? "Buổi cố định" : "Buổi phát sinh"}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2 sm:gap-3">
-          {isDraft && <OpenSessionButton slug={session.slug} />}
-          <RsvpLinkButton slug={session.slug} disabled={rsvpLinkDisabled} />
-          {!isClosed && (
-            <EditSessionButton
-              slug={session.slug}
-              playDate={session.playDate}
-              startTime={session.startTime}
-              endTime={session.endTime}
-              court={session.court}
-            />
-          )}
-        </div>
+        {me.isAdmin && (
+          <div className="flex flex-wrap gap-2 sm:gap-3">
+            {isDraft && <OpenSessionButton slug={session.slug} />}
+            <RsvpLinkButton slug={session.slug} disabled={rsvpLinkDisabled} />
+            {!isClosed && (
+              <EditSessionButton
+                slug={session.slug}
+                playDate={session.playDate}
+                startTime={session.startTime}
+                endTime={session.endTime}
+                court={session.court}
+              />
+            )}
+          </div>
+        )}
       </div>
 
       <Card className="flex flex-col gap-3">
@@ -94,9 +96,9 @@ export default async function SessionDetailPage({
           <CardTitle>
             Danh sách đăng ký ({session.memberCount} thành viên + {session.guestCount} khách)
           </CardTitle>
-          {!isClosed && (
+          {!isClosed && me.isAdmin && (
             <div className="flex flex-wrap items-center gap-2">
-              {me.isAdmin && <BulkMarkGoingButton slug={session.slug} pendingAttendeeIds={pendingAttendeeIds} />}
+              <BulkMarkGoingButton slug={session.slug} pendingAttendeeIds={pendingAttendeeIds} />
               <AddParticipantsButton
                 slug={session.slug}
                 members={membersRes.items ?? []}

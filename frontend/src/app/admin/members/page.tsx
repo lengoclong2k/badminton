@@ -22,6 +22,8 @@ type Member = {
 
 type PaginatedMembers = { items: Member[]; total: number; page: number; limit: number };
 
+type Me = { isAdmin: boolean };
+
 type FeeStatusRow = {
   memberId: string;
   slug: string;
@@ -42,9 +44,10 @@ export default async function MembersPage({
   const { page: pageParam } = await searchParams;
   const page = parsePage(pageParam);
 
-  const [membersRes, feeStatus] = await Promise.all([
+  const [membersRes, feeStatus, me] = await Promise.all([
     apiFetch<PaginatedMembers>(`/members?limit=${LIMIT}&page=${page}`),
     apiFetch<FeeStatusRow[]>("/members/fee-status"),
+    apiFetch<Me>("/auth/me"),
   ]);
 
   const members = membersRes.items ?? [];
@@ -63,10 +66,12 @@ export default async function MembersPage({
             {membersRes.total} người · {male} nam · {female} nữ
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <OpenFeePeriodButton />
-          <AddMemberButton />
-        </div>
+        {me.isAdmin && (
+          <div className="flex flex-wrap gap-2">
+            <OpenFeePeriodButton />
+            <AddMemberButton />
+          </div>
+        )}
       </div>
 
       <Card className="flex flex-col gap-2 p-3">
@@ -86,7 +91,11 @@ export default async function MembersPage({
             <ClickableRow
               key={m.id}
               href={`/admin/members/${m.slug}`}
-              trailing={<MemberRowMenu id={m.slug} name={m.fullName} sex={m.sex} hasUnpaid={hasUnpaid} />}
+              trailing={
+                me.isAdmin ? (
+                  <MemberRowMenu id={m.slug} name={m.fullName} sex={m.sex} hasUnpaid={hasUnpaid} />
+                ) : undefined
+              }
             >
               <div className="flex items-center gap-3">
                 <MemberIdentity name={m.fullName} sex={m.sex} className="flex-1" />
