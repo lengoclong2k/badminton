@@ -73,7 +73,7 @@ export function OpenFeePeriodButton() {
 
   return (
     <>
-      <Button size="sm" onClick={() => setOpen(true)}>
+      <Button onClick={() => setOpen(true)}>
         Mở đợt thu quỹ mới
       </Button>
       <Modal open={open} onClose={() => setOpen(false)}>
@@ -182,7 +182,7 @@ export function CollectFeeButton() {
 
   return (
     <>
-      <Button size="sm" variant="secondary" onClick={() => setOpen(true)}>
+      <Button variant="secondary" onClick={() => setOpen(true)}>
         Thu quỹ
       </Button>
       <Modal open={open} onClose={() => setOpen(false)}>
@@ -258,7 +258,7 @@ export function AddExpenseButton() {
 
   return (
     <>
-      <Button size="sm" onClick={() => setOpen(true)}>
+      <Button onClick={() => setOpen(true)}>
         + Thêm khoản chi
       </Button>
       <Modal open={open} onClose={() => setOpen(false)}>
