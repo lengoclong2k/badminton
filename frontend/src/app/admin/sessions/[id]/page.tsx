@@ -61,10 +61,10 @@ export default async function SessionDetailPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl font-bold text-ink">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h1 className="text-xl font-bold text-ink sm:text-2xl">
               Điểm danh · {new Date(session.playDate).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" })}
             </h1>
             <SessionStatusBadge status={session.status} />
@@ -74,7 +74,7 @@ export default async function SessionDetailPage({
             {session.sessionType === "fixed" ? "Buổi cố định" : "Buổi phát sinh"}
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-2 sm:gap-3">
           {isDraft && <OpenSessionButton slug={session.slug} />}
           <RsvpLinkButton slug={session.slug} disabled={rsvpLinkDisabled} />
           {!isClosed && (
@@ -90,12 +90,12 @@ export default async function SessionDetailPage({
       </div>
 
       <Card className="flex flex-col gap-3">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <CardTitle>
             Danh sách đăng ký ({session.memberCount} thành viên + {session.guestCount} khách)
           </CardTitle>
           {!isClosed && (
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {me.isAdmin && <BulkMarkGoingButton slug={session.slug} pendingAttendeeIds={pendingAttendeeIds} />}
               <AddParticipantsButton
                 slug={session.slug}
@@ -111,9 +111,16 @@ export default async function SessionDetailPage({
           const name = a.isGuest ? `Khách: ${a.guestName}` : a.member?.fullName ?? "—";
           const sex = a.isGuest ? a.guestSex ?? "nam" : a.member?.sex ?? "nam";
           return (
-            <div key={a.id} className="flex items-center gap-3 border-b border-line pb-3 last:border-0 last:pb-0">
-              <SexChip sex={sex} />
-              <p className="flex-1 text-sm font-medium text-ink">{name}</p>
+            <div
+              key={a.id}
+              className="flex flex-wrap items-center gap-2 border-b border-line pb-3 last:border-0 last:pb-0 sm:gap-3"
+            >
+              <div className="flex min-w-0 flex-1 items-center gap-2">
+                <SexChip sex={sex} />
+                <p className="min-w-0 flex-1 truncate text-sm font-medium text-ink" title={name}>
+                  {name}
+                </p>
+              </div>
               {a.isGuest ? (
                 <GuestPaidBadge
                   attendeeId={a.id}
@@ -136,7 +143,7 @@ export default async function SessionDetailPage({
 
       <Card className="flex flex-col gap-4">
         <CardTitle>Kết toán buổi {isClosed ? "(đã chốt)" : "(chốt buổi)"}</CardTitle>
-        <div className="flex gap-8">
+        <div className="flex flex-wrap gap-4 sm:gap-8">
           <div>
             <p className="text-xs text-sec">Tiền sân</p>
             <p className="font-mono text-lg text-danger-ink">−{money(session.totalCost)}</p>
@@ -154,7 +161,7 @@ export default async function SessionDetailPage({
           </div>
         </div>
         {!isClosed && me.isAdmin && (
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <CancelSessionButton slug={session.slug} />
             <CloseSessionButton slug={session.slug} totalCost={session.totalCost} guestIncome={session.guestIncome} />
           </div>

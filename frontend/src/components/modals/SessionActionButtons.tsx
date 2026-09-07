@@ -51,7 +51,7 @@ export function GuestPaidBadge({
   }
 
   return (
-    <div className="flex min-w-[280px] items-center justify-end gap-3">
+    <div className="flex w-full flex-wrap items-center justify-start gap-3 sm:w-auto sm:min-w-[280px] sm:justify-end sm:flex-nowrap">
       <Badge tone={guestPaid ? "success" : "danger"}>
         {guestPaid ? `Đã nộp ${money(guestFee)}` : `Chưa nộp ${money(guestFee)}`}
       </Badge>
@@ -110,7 +110,7 @@ export function MemberRsvpControl({
   // Không sửa được (viewer thường, hoặc buổi đã chốt): chỉ hiện nhãn trạng thái.
   if (!canEdit) {
     return (
-      <div className="flex min-w-[280px] items-center justify-end">
+      <div className="flex w-full items-center justify-start sm:w-auto sm:min-w-[280px] sm:justify-end">
         <Badge tone={tone}>{label}</Badge>
       </div>
     );
@@ -120,7 +120,7 @@ export function MemberRsvpControl({
   // (nút tương ứng được tô đậm) — bỏ Badge để khỏi lặp lại cùng 1 nhãn 2 lần.
   // Khi còn "Chưa điểm danh" thì hiện thêm nhãn đó vì chưa nút nào được tô.
   return (
-    <div className="flex min-w-[280px] items-center justify-end gap-2">
+    <div className="flex w-full flex-wrap items-center justify-start gap-2 sm:w-auto sm:min-w-[280px] sm:justify-end sm:flex-nowrap">
       {status === "pending" && <Badge tone={tone}>{label}</Badge>}
       <Button
         type="button"
@@ -135,7 +135,7 @@ export function MemberRsvpControl({
       <Button
         type="button"
         size="sm"
-        variant={status === "cancelled" ? "destructive" : "secondary"}
+        variant={status === "cancelled" ? "dangerSolid" : "secondary"}
         onClick={() => mark("cancelled")}
         disabled={submitting}
         className="shrink-0"
