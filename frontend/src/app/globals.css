@@ -13,16 +13,18 @@
   --color-faint: #b0bdb6;
   --color-ctrl: #d3dbd5;
 
-  /* Mint — primary action */
-  --color-mint-50: #eaf6f0;
-  --color-mint-100: #d6ede2;
-  --color-mint-300: #a5d9c3;
-  --color-mint: #6fc2a0;
-  --color-mint-hover: #5bb394;
-  --color-mint-active: #4aa082;
-  --color-mint-ink: #16342a;
-  --color-mint-text: #3d8168;
-  --color-mint-deep: #2f6b54;
+  /* Primary action — xanh dương pastel (giữ tên biến "mint" để không phải
+     sửa lại toàn bộ class Tailwind bg-mint/text-mint-ink/... đang dùng khắp
+     app; chỉ đổi giá trị màu bên dưới). */
+  --color-mint-50: #eaf3fa;
+  --color-mint-100: #d3e6f2;
+  --color-mint-300: #9cc9e4;
+  --color-mint: #6fadd6;
+  --color-mint-hover: #5b9bc7;
+  --color-mint-active: #4a89b6;
+  --color-mint-ink: #123048;
+  --color-mint-text: #2f6690;
+  --color-mint-deep: #235277;
 
   /* Status */
   --color-info: #8fbeda;
