@@ -1,6 +1,6 @@
 import { Card, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { SexChip } from "@/components/ui/Chip";
+import { MemberIdentity } from "@/components/ui/Chip";
 import { ClickableRow } from "@/components/ui/ListRow";
 import { Pagination, parsePage } from "@/components/ui/Pagination";
 import { AddMemberButton } from "@/components/modals/AddMemberModal";
@@ -89,8 +89,7 @@ export default async function MembersPage({
               trailing={<MemberRowMenu id={m.slug} name={m.fullName} sex={m.sex} hasUnpaid={hasUnpaid} />}
             >
               <div className="flex items-center gap-3">
-                <SexChip sex={m.sex} />
-                <p className="flex-1 text-sm font-medium text-ink">{m.fullName}</p>
+                <MemberIdentity name={m.fullName} sex={m.sex} className="flex-1" />
                 <Badge tone={!everOpened ? "info" : hasUnpaid ? "danger" : "success"}>{statusLabel}</Badge>
               </div>
             </ClickableRow>

@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/Card";
-import { SexChip } from "@/components/ui/Chip";
+import { MemberIdentity } from "@/components/ui/Chip";
 import { cn } from "@/lib/cn";
 import { apiFetch } from "@/lib/api/server";
 
@@ -36,10 +36,12 @@ export default async function MemberRankingPage() {
               className={cn("flex items-center gap-3 rounded-control px-2 py-2", isMe && "bg-mint-50")}
             >
               <span className="w-5 font-mono text-sm text-mut">{r.rank}</span>
-              <SexChip sex={r.sex} />
-              <p className="flex-1 text-sm font-medium text-ink">
-                {r.fullName} {isMe && <span className="text-mint-deep">(bạn)</span>}
-              </p>
+              <MemberIdentity
+                name={r.fullName}
+                sex={r.sex}
+                nameSuffix={isMe && <span className="shrink-0 text-mint-deep">(bạn)</span>}
+                className="flex-1"
+              />
               <span className="font-mono text-sm text-mint-deep">
                 {r.costPerSession != null ? `${money(r.costPerSession)}/buổi` : "—"}
               </span>

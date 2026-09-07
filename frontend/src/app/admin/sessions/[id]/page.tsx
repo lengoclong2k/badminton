@@ -1,4 +1,5 @@
 import { Card, CardTitle } from "@/components/ui/Card";
+import { MemberIdentity } from "@/components/ui/Chip";
 import {
   AddParticipantsButton, BulkMarkGoingButton, CancelSessionButton, CloseSessionButton, EditSessionButton,
   GuestPaidBadge, MemberRsvpControl, OpenSessionButton, RsvpLinkButton, RsvpStatusBadge, SessionStatusBadge,
@@ -114,19 +115,12 @@ export default async function SessionDetailPage({
               key={a.id}
               className="flex flex-col gap-2 border-b border-line pb-3 last:border-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
             >
-              <div className="flex min-w-0 flex-col gap-1">
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`text-xs font-semibold ${sex === "nam" ? "text-nam-text" : "text-nu-text"}`}
-                  >
-                    {sex === "nam" ? "Nam" : "Nữ"}
-                  </span>
-                  {!a.isGuest && <RsvpStatusBadge status={a.rsvpStatus} />}
-                </div>
-                <p className="truncate text-sm font-medium text-ink" title={name}>
-                  {name}
-                </p>
-              </div>
+              <MemberIdentity
+                name={name}
+                sex={sex}
+                topExtra={!a.isGuest && <RsvpStatusBadge status={a.rsvpStatus} />}
+                className="min-w-0 flex-1"
+              />
               {a.isGuest ? (
                 <GuestPaidBadge
                   attendeeId={a.id}

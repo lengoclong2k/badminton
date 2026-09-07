@@ -1,5 +1,5 @@
 import { Card, CardTitle } from "@/components/ui/Card";
-import { SexChip } from "@/components/ui/Chip";
+import { MemberIdentity } from "@/components/ui/Chip";
 import { apiFetch } from "@/lib/api/server";
 
 type LeaderboardRow = {
@@ -33,13 +33,16 @@ export default async function LeaderboardPage() {
         {ranking.map((r) => (
           <div key={r.memberId} className="flex items-center gap-3.5 border-b border-line pb-3 last:border-0 last:pb-0">
             <span className="font-mono text-base text-mut w-6">{r.rank}</span>
-            <SexChip sex={r.sex} />
-            <div className="flex-1">
-              <p className="text-sm font-medium text-ink">{r.fullName}</p>
-              <p className="text-xs text-mut">
-                {money(r.feeAmount)} ÷ {r.sessionsAttended} buổi trong tháng
-              </p>
-            </div>
+            <MemberIdentity
+              name={r.fullName}
+              sex={r.sex}
+              subtitle={
+                <p className="text-xs text-mut">
+                  {money(r.feeAmount)} ÷ {r.sessionsAttended} buổi trong tháng
+                </p>
+              }
+              className="flex-1"
+            />
             <span className="font-mono text-sm text-mint-deep">
               {r.costPerSession != null ? `${money(r.costPerSession)}/buổi` : "—"}
             </span>
