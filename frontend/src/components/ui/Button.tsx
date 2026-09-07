@@ -11,7 +11,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<Variant, string> = {
   primary:
-    "bg-mint text-mint-ink hover:bg-mint-hover active:bg-mint-active font-semibold",
+    "bg-linear-to-b from-mint-300 to-mint text-mint-ink hover:brightness-95 active:brightness-90 font-semibold",
   secondary:
     "bg-surface text-ink border border-border hover:bg-soft font-semibold",
   destructive:
@@ -32,7 +32,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={cn(
-          "inline-flex items-center justify-center gap-2 rounded-control transition-colors disabled:opacity-50 disabled:pointer-events-none",
+          "inline-flex items-center justify-center gap-2 rounded-control transition-[background-color,background-image,filter,border-color] disabled:opacity-50 disabled:pointer-events-none",
           variantClasses[variant],
           sizeClasses[size],
           className

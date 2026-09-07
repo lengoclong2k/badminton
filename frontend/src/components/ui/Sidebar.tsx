@@ -95,7 +95,7 @@ export function Sidebar({
       )}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-[240px] shrink-0 flex-col overflow-y-auto border-r border-sage-border bg-sage px-4 py-6 transition-transform duration-200 lg:static lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 flex w-[240px] shrink-0 flex-col overflow-y-auto border-r border-sage-border bg-linear-to-b from-sage to-mint-50 px-4 py-6 transition-transform duration-200 lg:static lg:translate-x-0",
           mobileOpen ? "translate-x-0" : "-translate-x-full",
           collapsed ? "lg:w-[76px] lg:px-2" : "lg:w-[220px] lg:px-4",
         )}

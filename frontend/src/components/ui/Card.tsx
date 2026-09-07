@@ -36,7 +36,7 @@ export function StatCard({
     <div
       className={cn(
         "flex-1 min-w-[220px] rounded-card p-4",
-        accent ? "bg-mint-100" : "border border-border bg-surface"
+        accent ? "bg-linear-to-br from-mint-100 to-mint-50" : "border border-border bg-surface"
       )}
     >
       <p className={cn("text-xs font-medium", accent ? "text-mint-deep" : "text-sec")}>

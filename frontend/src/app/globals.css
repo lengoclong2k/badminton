@@ -103,7 +103,10 @@
 }
 
 body {
-  background: var(--color-bg);
+  /* Pastel gradient wash phía trên trang, tan dần về màu nền trung tính bình
+     thường — nhẹ nhàng, không lấn nội dung. */
+  background: linear-gradient(180deg, var(--color-mint-50) 0%, var(--color-bg) 480px);
+  background-attachment: fixed;
   color: var(--color-ink);
   font-family: var(--font-sans);
 }
