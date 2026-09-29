@@ -129,7 +129,7 @@ export function Sidebar({
             <NavItem
               key={link.href}
               {...link}
-              active={link.href === activeHref}
+              active={link.href === activeHref || (link.href !== "/admin" && activeHref.startsWith(`${link.href}/`))}
               collapsed={collapsed}
               onClick={onCloseMobile}
             />

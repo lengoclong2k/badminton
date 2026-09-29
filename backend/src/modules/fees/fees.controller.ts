@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { MemberRole } from 'src/common/enums';
 import { CurrentMember, Roles } from 'src/common/decorators';
@@ -16,6 +16,23 @@ export class FeesController {
   @ApiOperation({ summary: 'Danh sách các đợt thu quỹ đã từng mở' })
   periods() {
     return this.service.listPeriods();
+  }
+
+  @Get('periods/open')
+  @ApiOperation({ summary: 'Các đợt thu quỹ đang mở kèm số người đã đóng — màn Quản lý đợt quỹ' })
+  openPeriods() {
+    return this.service.listOpenPeriodsWithStats();
+  }
+
+  @Delete('periods/:periodId')
+  @Roles(MemberRole.ADMIN)
+  @HttpCode(204)
+  @ApiOperation({ summary: 'Xóa đợt thu quỹ — chỉ được khi chưa ai đóng (đã có người đóng → 409)' })
+  deletePeriod(
+    @CurrentMember() user: AuthenticatedUser,
+    @Param('periodId', ParseUUIDPipe) periodId: string,
+  ) {
+    return this.service.deletePeriod(user.authUserId, periodId);
   }
 
   @Get('overview')

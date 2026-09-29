@@ -113,6 +113,11 @@ export class DbFunctionsService {
     });
   }
 
+  /** Xóa 1 đợt thu quỹ — SQL tự chặn nếu đợt đã có người đóng (lỗi 55000 → 409). */
+  async deleteFeePeriod(authUserId: string, periodId: string): Promise<void> {
+    await this.runAsUser(authUserId, (m) => m.query('select public.delete_fee_period($1::uuid)', [periodId]));
+  }
+
   async unpayMemberFee(authUserId: string, feeId: string): Promise<void> {
     await this.runAsUser(authUserId, (m) => m.query('select public.unpay_member_fee($1)', [feeId]));
   }

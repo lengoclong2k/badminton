@@ -320,3 +320,45 @@ export function DeleteEntryButton({ label, id }: { label: string; id: string }) 
     </>
   );
 }
+
+/** Xóa 1 đợt thu quỹ (màn Quản lý đợt quỹ). Chỉ render khi đợt chưa ai
+ *  đóng — backend/SQL vẫn chặn lại lần nữa nếu có người vừa đóng xen vào. */
+export function DeleteFeePeriodButton({ id, label }: { id: string; label: string }) {
+  const [open, setOpen] = useState(false);
+  const { showToast } = useToast();
+  const router = useRouter();
+
+  async function handleConfirm() {
+    try {
+      await apiDelete(`/fees/periods/${id}`);
+      showToast("Đã xóa đợt thu quỹ");
+      router.refresh();
+    } catch (e) {
+      const msg = e instanceof Error && e.message.includes("→ 409")
+        ? "Đợt này vừa có người đóng quỹ, không thể xóa"
+        : "Xóa đợt quỹ thất bại, thử lại sau";
+      showToast(msg);
+      router.refresh();
+    }
+  }
+
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        className="text-xs font-medium text-danger-text hover:underline"
+      >
+        Xóa
+      </button>
+      <ConfirmTypeModal
+        open={open}
+        onClose={() => setOpen(false)}
+        title="Xóa đợt thu quỹ"
+        description={`Xóa ${label} cùng toàn bộ khoản "chưa đóng" của thành viên trong đợt. Không thể hoàn tác.`}
+        confirmWord="XÓA"
+        confirmLabel="Xóa đợt này"
+        onConfirm={handleConfirm}
+      />
+    </>
+  );
+}

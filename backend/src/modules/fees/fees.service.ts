@@ -22,6 +22,66 @@ export class FeesService {
     return this.periods.find({ order: { openedAt: 'DESC' } });
   }
 
+  /** Các đợt đang mở kèm thống kê — cho màn "Quản lý đợt quỹ".
+   *  canDelete = chưa ai đóng trong đợt (paidCount = 0). */
+  async listOpenPeriodsWithStats(): Promise<
+    {
+      id: string;
+      openedAt: Date;
+      feeMale: number;
+      feeFemale: number;
+      dueDate: string | null;
+      memberCount: number;
+      paidCount: number;
+      totalAmount: number;
+      paidAmount: number;
+      canDelete: boolean;
+    }[]
+  > {
+    const rows: {
+      id: string;
+      opened_at: Date;
+      fee_male: string;
+      fee_female: string;
+      due_date: string | null;
+      member_count: string;
+      paid_count: string;
+      total_amount: string;
+      paid_amount: string;
+    }[] = await this.periods.query(
+      `select p.id, p.opened_at, p.fee_male, p.fee_female, p.due_date::text as due_date,
+              count(f.id)                                              as member_count,
+              count(f.id) filter (where f.status = 'paid')             as paid_count,
+              coalesce(sum(f.amount), 0)                               as total_amount,
+              coalesce(sum(f.amount) filter (where f.status = 'paid'), 0) as paid_amount
+         from public.fee_periods p
+         left join public.member_fees f on f.period_id = p.id
+        where p.status = 'open'
+        group by p.id
+        order by p.opened_at desc`,
+    );
+    return rows.map((r) => {
+      const paidCount = Number(r.paid_count);
+      return {
+        id: r.id,
+        openedAt: r.opened_at,
+        feeMale: Number(r.fee_male),
+        feeFemale: Number(r.fee_female),
+        dueDate: r.due_date,
+        memberCount: Number(r.member_count),
+        paidCount,
+        totalAmount: Number(r.total_amount),
+        paidAmount: Number(r.paid_amount),
+        canDelete: paidCount === 0,
+      };
+    });
+  }
+
+  /** Xóa đợt thu quỹ chưa ai đóng. */
+  deletePeriod(authUserId: string, periodId: string): Promise<void> {
+    return this.dbFunctions.deleteFeePeriod(authUserId, periodId);
+  }
+
   /** Tổng quan quỹ: đã đóng / chưa đóng / còn thiếu — cộng dồn mọi đợt, không khoanh theo tháng. */
   async feeOverview(): Promise<FeeOverviewView | null> {
     return this.overview.findOne({ where: {} });

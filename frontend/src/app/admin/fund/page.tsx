@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Card, CardTitle, StatCard } from "@/components/ui/Card";
 import { StaticRow } from "@/components/ui/ListRow";
 import { Pagination, parsePage } from "@/components/ui/Pagination";
@@ -47,7 +48,15 @@ export default async function FundPage({
 
   return (
     <div className="flex flex-col gap-8">
-      <h1 className="text-2xl font-bold text-ink">Quỹ CLB</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-bold text-ink">Quỹ CLB</h1>
+        <Link
+          href="/admin/fund/periods"
+          className="inline-flex h-9 items-center rounded-control border border-border bg-surface px-4 text-sm font-semibold text-ink hover:bg-soft"
+        >
+          Quản lý đợt quỹ
+        </Link>
+      </div>
 
       <div className="flex flex-wrap gap-4">
         <StatCard
