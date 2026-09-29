@@ -93,12 +93,22 @@ export class DbFunctionsService {
     paidOn?: string,
     method?: string,
   ): Promise<number> {
+    // Tương đương supabase.rpc('pay_member_fees', { p_fee_ids, ...(paidOn && { p_paid_on }), ...(method && { p_method }) }):
+    // chỉ truyền tham số khi có giá trị để Postgres dùng DEFAULT (p_paid_on = current_date)
+    // thay vì ghi đè bằng NULL.
+    const args: string[] = ['p_fee_ids => $1::uuid[]'];
+    const params: unknown[] = [feeIds];
+    if (paidOn) {
+      params.push(paidOn);
+      args.push(`p_paid_on => $${params.length}::date`);
+    }
+    if (method) {
+      params.push(method);
+      args.push(`p_method => $${params.length}::text`);
+    }
+
     return this.runAsUser(authUserId, async (m) => {
-      const rows = await m.query('select public.pay_member_fees($1::uuid[], $2::date, $3) as result', [
-        feeIds,
-        paidOn ?? null,
-        method ?? null,
-      ]);
+      const rows = await m.query(`select public.pay_member_fees(${args.join(', ')}) as result`, params);
       return Number(rows[0].result ?? 0);
     });
   }
