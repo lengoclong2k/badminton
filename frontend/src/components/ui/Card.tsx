@@ -26,11 +26,13 @@ export function StatCard({
   value,
   sub,
   accent,
+  negative,
 }: {
   label: string;
   value: string;
   sub?: string;
   accent?: boolean;
+  negative?: boolean;
 }) {
   return (
     <div
@@ -45,7 +47,7 @@ export function StatCard({
       <p
         className={cn(
           "mt-1 font-mono text-2xl font-medium",
-          accent ? "text-mint-ink" : "text-ink"
+          negative ? "text-danger-ink" : accent ? "text-mint-ink" : "text-ink"
         )}
       >
         {value}

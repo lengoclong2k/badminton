@@ -21,6 +21,8 @@ type FundEntry = {
 type PaginatedEntries = { items: FundEntry[]; total: number; page: number; limit: number };
 
 const money = (n: number) => `${Math.abs(Math.round(n)).toLocaleString("vi-VN")} ₫`;
+// Số dư có thể âm (chi nhiều hơn thu) — phải giữ dấu, không dùng money() trần.
+const signedMoney = (n: number) => `${Math.round(n) < 0 ? "−" : ""}${money(n)}`;
 
 function formatDate(iso: string) {
   const d = new Date(iso);
@@ -50,7 +52,8 @@ export default async function FundPage({
       <div className="flex flex-wrap gap-4">
         <StatCard
           label="Số dư hiện tại"
-          value={money(balance.balance)}
+          value={signedMoney(balance.balance)}
+          negative={balance.balance < 0}
           sub={balance.lastEntryDate ? `Cập nhật ${formatDate(balance.lastEntryDate)}` : "Chưa có giao dịch"}
           accent
         />
